@@ -126,7 +126,7 @@ class GFPatternValidation extends GFAddOn {
 	}
 
 	function tooltips( $tooltips ) {
-	   $tooltips['form_field_pattern_value'] = "<h6>Validate Pattern</h6>Regex or pattern to validate against";
+	   $tooltips['form_field_pattern_value'] = "<h6>Validate Pattern</h6>Enter a regex or pattern to validate this field's input against.";
 	   return $tooltips;
 	}
 
