@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name: Pattern Validation for Gravity Forms
-Plugin URI: http://waz.ski
-Description: A simple add-on to demonstrate the use of the Add-On Framework
+Plugin URI: https://github.com/zacwasielewski/Pattern-Validation-for-Gravity-Forms
+Description: Gravity Forms Add-On that validates field input against a string or regex pattern
 Version: 0.1
 Author: Zac Wasielewski
 Author URI: http://waz.ski

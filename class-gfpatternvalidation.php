@@ -42,12 +42,10 @@ class GFPatternValidation extends GFAddOn {
 	// # FRONTEND FUNCTIONS --------------------------------------------------------------------------------------------
 
 	function validate_field( $result, $value, $form, $field ) {
-		$valid = true;
+		$pattern = $field->patternField;
 
-		if ( $this->should_validate( $field->patternField ) ) {
-			$valid = $this->validate( $field->patternField, $value );
-
-			if ( $valid === false ) {
+		if ( $this->should_validate( $pattern ) ) {
+			if ( !$this->validate( $pattern, $value ) ) {
 				$result['is_valid'] = false;
 				$result['message']  = esc_html__( $field->label, 'patternvalidation' ) . ' is invalid.';
 			}
@@ -62,7 +60,7 @@ class GFPatternValidation extends GFAddOn {
 	function field_advanced_settings( $position, $form_id ) {
     if ( $position == 100 ) {
       ?>
-      <li class="pattern_setting field_setting" data-gf_display="list-item">
+      <li class="pattern_setting field_setting">
         <label for="field_pattern">
           <?php _e("Validate Pattern", "gravityforms"); ?>
           <?php gform_tooltip("form_field_pattern_value") ?>
@@ -76,6 +74,7 @@ class GFPatternValidation extends GFAddOn {
 	function editor_script() {
     ?>
     <script type="text/javascript">
+			// Enable pattern setting for specific field types:
 			fieldSettings['text'] += ', .pattern_setting';
 			fieldSettings['post_custom_field'] += ', .pattern_setting';
 
@@ -95,7 +94,6 @@ class GFPatternValidation extends GFAddOn {
 	// # HELPERS -------------------------------------------------------------------------------------------------------
 
 	function should_validate( $pattern = '' ) {
-		//return isset($pattern) && trim($pattern) !== '';
 		return trim($pattern) !== '';
 	}
 
