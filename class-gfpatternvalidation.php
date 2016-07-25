@@ -35,70 +35,31 @@ class GFPatternValidation extends GFAddOn {
 		add_filter( 'gform_field_advanced_settings', array( $this, 'field_advanced_settings' ), 10, 2 );
 		add_action( 'gform_editor_js', array( $this, 'editor_script' ));
 		add_filter( 'gform_tooltips', array( $this, 'tooltips' ));
+		add_filter( 'gform_field_validation', array( $this, 'validate_field'), 10, 4 );
 	}
 
 
-	// # SCRIPTS & STYLES -----------------------------------------------------------------------------------------------
-
-	/**
-	 * Return the scripts which should be enqueued.
-	 *
-	 * @return array
-	 */
-	//public function scripts() {
-	//	$scripts = array(
-	//		array(
-	//			'handle'  => 'my_script_js',
-	//			'src'     => $this->get_base_url() . '/js/my_script.js',
-	//			'version' => $this->_version,
-	//			'deps'    => array( 'jquery' ),
-	//			'strings' => array(
-	//				'first'  => esc_html__( 'First Choice', 'simpleaddon' ),
-	//				'second' => esc_html__( 'Second Choice', 'simpleaddon' ),
-	//				'third'  => esc_html__( 'Third Choice', 'simpleaddon' )
-	//			),
-	//			'enqueue' => array(
-	//				array(
-	//					'admin_page' => array( 'form_settings' ),
-	//					'tab'        => 'simpleaddon'
-	//				)
-	//			)
-	//		),
-	//
-	//	);
-	//
-	//	return array_merge( parent::scripts(), $scripts );
-	//}
-
-	/**
-	 * Return the stylesheets which should be enqueued.
-	 *
-	 * @return array
-	 */
-	//public function styles() {
-	//	$styles = array(
-	//		array(
-	//			'handle'  => 'my_styles_css',
-	//			'src'     => $this->get_base_url() . '/css/my_styles.css',
-	//			'version' => $this->_version,
-	//			'enqueue' => array(
-	//				array( 'field_types' => array( 'poll' ) )
-	//			)
-	//		)
-	//	);
-	//
-	//	return array_merge( parent::styles(), $styles );
-	//}
-
-
 	// # FRONTEND FUNCTIONS --------------------------------------------------------------------------------------------
+
+	function validate_field( $result, $value, $form, $field ) {
+		$valid = true;
+
+		if ( $this->should_validate( $field->patternField ) ) {
+			$valid = $this->validate( $field->patternField, $value );
+
+			if ( $valid === false ) {
+				$result['is_valid'] = false;
+				$result['message']  = esc_html__( $field->label, 'patternvalidation' ) . ' is invalid.';
+			}
+		}
+
+		return $result;
+	}
 
 
 	// # ADMIN FUNCTIONS -----------------------------------------------------------------------------------------------
 
 	function field_advanced_settings( $position, $form_id ) {
-
-    //create settings on position 50 (right after Admin Label)
     if ( $position == 100 ) {
       ?>
       <li class="pattern_setting field_setting" data-gf_display="list-item">
@@ -126,11 +87,39 @@ class GFPatternValidation extends GFAddOn {
 	}
 
 	function tooltips( $tooltips ) {
-	   $tooltips['form_field_pattern_value'] = "<h6>Validate Pattern</h6>Enter a regex or pattern to validate this field's input against.";
+	   $tooltips['form_field_pattern_value'] = "<h6>Validate Pattern</h6>Enter pattern to validate this field's input against. To use regular expression matching, wrap your pattern with forward slashes (example: /mypattern/)";
 	   return $tooltips;
 	}
 
 
 	// # HELPERS -------------------------------------------------------------------------------------------------------
+
+	function should_validate( $pattern = '' ) {
+		//return isset($pattern) && trim($pattern) !== '';
+		return trim($pattern) !== '';
+	}
+
+	function validate( $pattern, $value ) {
+		if ( $this->is_regex( $pattern ) ) {
+			return $this->validate_regex( $pattern, $value);
+		} else {
+			return $this->validate_string( $pattern, $value);
+		}
+	}
+
+	function validate_regex( $pattern, $value ) {
+ 		return preg_match( $pattern, $value ) === 1;
+	}
+
+	function validate_string( $string, $value ) {
+		return $string === $value;
+	}
+
+	function is_regex( $str = '' ) {
+		$chars = str_split($str);
+		$first = array_shift($chars);
+		$last  = array_pop($chars);
+		return ($first . $last) === '//';
+	}
 
 }
